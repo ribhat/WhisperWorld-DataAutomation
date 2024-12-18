@@ -36,6 +36,12 @@ class DataAnalysisApp:
         self.creative_type_var = tk.StringVar(value="F(TVC) + F(ICA)")
         tk.Entry(self.inputs_frame, textvariable=self.creative_type_var).grid(row=5, column=1)
 
+        # Target Audience Dropdown
+        tk.Label(self.inputs_frame, text="Target Audience:").grid(row=8, column=0, sticky="e")
+        self.target_audience_var = tk.StringVar(value="None")
+        target_audience_options = ["None", "Male", "Female"]
+        tk.OptionMenu(self.inputs_frame, self.target_audience_var, *target_audience_options).grid(row=8, column=1)
+
         # File selection
         tk.Label(self.inputs_frame, text="Excel File:").grid(row=6, column=0, sticky="e")
         self.file_path_var = tk.StringVar()
@@ -70,6 +76,7 @@ class DataAnalysisApp:
             spont_brand_tvc = self.spont_brand_tvc_var.get()
             spont_brand_tvc_ica = self.spont_brand_tvc_ica_var.get()
             creative_type = self.creative_type_var.get()
+            target_audience = self.target_audience_var.get()
             file_path = self.file_path_var.get()
 
             if not file_path:
@@ -78,6 +85,18 @@ class DataAnalysisApp:
             # Load the dataset
             campaign_data_india = pd.read_excel(file_path, sheet_name='INDIA', engine='openpyxl')
 
+            # List of columns to keep; Remove unused columns for managability
+            columns_to_keep = [
+                'Year', 'SECTOR', 'CATEGORY', 'ADVERTISER', 'BRAND', 'TARGET AUDIENCE',
+                'MARKET', 'CAMPAIGN FORMAT', 'TOM - TVC', 'TOM - TVC+ICA', 
+                'TOM Uplift (TVC vs TVC + ICA)', 'BR Unaided - TVC', 
+                'BR Unaied - TVC+ICA', 'BR Unaided Uplift (TVC vs TVC + ICA)', 
+                'Type of TVC (F/E/M)', 'Type of ICA (F/E/M)'
+            ]
+
+            # Filter the data to include only the specified columns
+            campaign_data_india = campaign_data_india[columns_to_keep]
+
             # Perform the analysis (simplified for GUI context)
             campaign_data_india['Spont Brand Uplift (%)'] = (
                 (campaign_data_india['BR Unaied - TVC+ICA'] - campaign_data_india['BR Unaided - TVC']) /
@@ -85,11 +104,17 @@ class DataAnalysisApp:
             ) * 100
 
             filtered_data = campaign_data_india.dropna(subset=['BR Unaided - TVC', 'BR Unaied - TVC+ICA'])
+
+            # Exclude low outliers
             filtered_data = filtered_data[filtered_data['BR Unaided - TVC'] > 25]
 
-            # Filter for records where the target audience is female
+            # Filter for records where the target audience is female/male
             filtered_data['TARGET AUDIENCE'] = filtered_data['TARGET AUDIENCE'].astype(str)
-            filtered_data = filtered_data[filtered_data['TARGET AUDIENCE'].str[0] == 'F']
+            
+            if target_audience == "Female":
+                filtered_data = filtered_data[filtered_data['TARGET AUDIENCE'].str[0] == 'F']
+            elif target_audience == "Male":
+                filtered_data = filtered_data[filtered_data['TARGET AUDIENCE'].str[0] == 'M']
 
             br_unaided_percentiles = filtered_data['BR Unaided - TVC'].quantile([0.40, 0.69])
 
