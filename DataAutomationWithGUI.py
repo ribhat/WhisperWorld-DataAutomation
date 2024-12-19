@@ -12,41 +12,55 @@ class DataAnalysisApp:
         self.inputs_frame = tk.Frame(root)
         self.inputs_frame.pack(pady=10)
 
+        # First Row: Brand Name and Creative Type
         tk.Label(self.inputs_frame, text="Brand Name:").grid(row=0, column=0, sticky="e")
         self.brand_name_var = tk.StringVar(value="Ponds")
         tk.Entry(self.inputs_frame, textvariable=self.brand_name_var).grid(row=0, column=1)
 
+        tk.Label(self.inputs_frame, text="Creative Type:").grid(row=0, column=2, sticky="e")
+                # Create a dropdown for the creative type options
+        creative_type_options = [ "F(TVC) + F(ICA)", "E(TVC) + F(ICA)", "M(TVC) + F(ICA)"]
+        self.creative_type_var = tk.StringVar(value=creative_type_options[0])  # Default value is the first option
+        tk.OptionMenu(self.inputs_frame, self.creative_type_var, *creative_type_options).grid(row=0, column=3)
+
+        # Second Row: TOM TVC and TOM TVC + ICA
         tk.Label(self.inputs_frame, text="TOM TVC:").grid(row=1, column=0, sticky="e")
         self.tom_tvc_var = tk.DoubleVar(value=60)
         tk.Entry(self.inputs_frame, textvariable=self.tom_tvc_var).grid(row=1, column=1)
 
-        tk.Label(self.inputs_frame, text="TOM TVC+ICA:").grid(row=2, column=0, sticky="e")
+        tk.Label(self.inputs_frame, text="TOM TVC+ICA:").grid(row=1, column=2, sticky="e")
         self.tom_tvc_ica_var = tk.DoubleVar(value=72)
-        tk.Entry(self.inputs_frame, textvariable=self.tom_tvc_ica_var).grid(row=2, column=1)
+        tk.Entry(self.inputs_frame, textvariable=self.tom_tvc_ica_var).grid(row=1, column=3)
 
-        tk.Label(self.inputs_frame, text="Spont Brand TVC:").grid(row=3, column=0, sticky="e")
+        # Third Row: Spont Brand TVC and Spont Brand TVC + ICA
+        tk.Label(self.inputs_frame, text="Spont Brand TVC:").grid(row=2, column=0, sticky="e")
         self.spont_brand_tvc_var = tk.DoubleVar(value=75)
-        tk.Entry(self.inputs_frame, textvariable=self.spont_brand_tvc_var).grid(row=3, column=1)
+        tk.Entry(self.inputs_frame, textvariable=self.spont_brand_tvc_var).grid(row=2, column=1)
 
-        tk.Label(self.inputs_frame, text="Spont Brand TVC+ICA:").grid(row=4, column=0, sticky="e")
+        tk.Label(self.inputs_frame, text="Spont Brand TVC+ICA:").grid(row=2, column=2, sticky="e")
         self.spont_brand_tvc_ica_var = tk.DoubleVar(value=80)
-        tk.Entry(self.inputs_frame, textvariable=self.spont_brand_tvc_ica_var).grid(row=4, column=1)
+        tk.Entry(self.inputs_frame, textvariable=self.spont_brand_tvc_ica_var).grid(row=2, column=3)
 
-        tk.Label(self.inputs_frame, text="Creative Type:").grid(row=5, column=0, sticky="e")
-        self.creative_type_var = tk.StringVar(value="F(TVC) + F(ICA)")
-        tk.Entry(self.inputs_frame, textvariable=self.creative_type_var).grid(row=5, column=1)
+        # Fourth Row: Lower Percentile and Upper Percentile
+        tk.Label(self.inputs_frame, text="Lower Percentile:").grid(row=3, column=0, sticky="e")
+        self.lower_percentile_var = tk.DoubleVar(value=40)
+        tk.Entry(self.inputs_frame, textvariable=self.lower_percentile_var).grid(row=3, column=1)
 
-        # Target Audience Dropdown
-        tk.Label(self.inputs_frame, text="Target Audience:").grid(row=8, column=0, sticky="e")
+        tk.Label(self.inputs_frame, text="Upper Percentile:").grid(row=3, column=2, sticky="e")
+        self.upper_percentile_var = tk.DoubleVar(value=69)
+        tk.Entry(self.inputs_frame, textvariable=self.upper_percentile_var).grid(row=3, column=3)
+
+        # Fifth Row: Excel File
+        tk.Label(self.inputs_frame, text="Excel File:").grid(row=4, column=0, sticky="e")
+        self.file_path_var = tk.StringVar()
+        tk.Entry(self.inputs_frame, textvariable=self.file_path_var, width=35).grid(row=4, column=1, padx=(0, 5))
+        tk.Button(self.inputs_frame, text="Browse", command=self.browse_file).grid(row=4, column=2)
+
+        # Sixth Row: Target Audience
+        tk.Label(self.inputs_frame, text="Target Audience:").grid(row=5, column=0, sticky="e")
         self.target_audience_var = tk.StringVar(value="None")
         target_audience_options = ["None", "Male", "Female"]
-        tk.OptionMenu(self.inputs_frame, self.target_audience_var, *target_audience_options).grid(row=8, column=1)
-
-        # File selection
-        tk.Label(self.inputs_frame, text="Excel File:").grid(row=6, column=0, sticky="e")
-        self.file_path_var = tk.StringVar()
-        tk.Entry(self.inputs_frame, textvariable=self.file_path_var, width=40).grid(row=6, column=1)
-        tk.Button(self.inputs_frame, text="Browse", command=self.browse_file).grid(row=6, column=2)
+        tk.OptionMenu(self.inputs_frame, self.target_audience_var, *target_audience_options).grid(row=5, column=1, padx=(0, 5))
 
         # Run Button
         tk.Button(root, text="Run Analysis", command=self.run_analysis).pack(pady=10)
@@ -78,6 +92,8 @@ class DataAnalysisApp:
             creative_type = self.creative_type_var.get()
             target_audience = self.target_audience_var.get()
             file_path = self.file_path_var.get()
+            lower_percentile = self.lower_percentile_var.get()
+            upper_percentile = self.upper_percentile_var.get()
 
             if not file_path:
                 raise ValueError("Please select a valid Excel file.")
@@ -116,12 +132,12 @@ class DataAnalysisApp:
             elif target_audience == "Male":
                 filtered_data = filtered_data[filtered_data['TARGET AUDIENCE'].str[0] == 'M']
 
-            br_unaided_percentiles = filtered_data['BR Unaided - TVC'].quantile([0.40, 0.69])
+            br_unaided_percentiles = filtered_data['BR Unaided - TVC'].quantile([lower_percentile / 100, upper_percentile / 100])
 
             def categorize_brand_size(br_unaided_score):
-                if br_unaided_score <= br_unaided_percentiles[0.40]:
+                if br_unaided_score <= br_unaided_percentiles[lower_percentile / 100]:
                     return 'Small'
-                elif br_unaided_score <= br_unaided_percentiles[0.69]:
+                elif br_unaided_score <= br_unaided_percentiles[upper_percentile / 100]:
                     return 'Medium'
                 else:
                     return 'Large'
@@ -136,11 +152,11 @@ class DataAnalysisApp:
 
             # Type of TVC vs Type of ICA Calculations
             filtered_type_data = filtered_data.dropna(subset=['Type of TVC (F/E/M)', 'Type of ICA (F/E/M)'])
-            filtered_combinations_data = filtered_type_data[
-                (((filtered_type_data['Type of TVC (F/E/M)'] == 'E') & (filtered_type_data['Type of ICA (F/E/M)'] == 'F')) |
-                 ((filtered_type_data['Type of TVC (F/E/M)'] == 'F') & (filtered_type_data['Type of ICA (F/E/M)'] == 'F')) |
-                 ((filtered_type_data['Type of TVC (F/E/M)'] == 'M') & (filtered_type_data['Type of ICA (F/E/M)'] == 'F')))
-            ]
+            filtered_combinations_data = filtered_type_data[(
+                ((filtered_type_data['Type of TVC (F/E/M)'] == 'E') & (filtered_type_data['Type of ICA (F/E/M)'] == 'F')) |
+                ((filtered_type_data['Type of TVC (F/E/M)'] == 'F') & (filtered_type_data['Type of ICA (F/E/M)'] == 'F')) |
+                ((filtered_type_data['Type of TVC (F/E/M)'] == 'M') & (filtered_type_data['Type of ICA (F/E/M)'] == 'F'))
+            )]
 
             combinations = {
                 "E(TVC) + F(ICA)": {'TVC': 'E', 'ICA': 'F'},
@@ -150,10 +166,10 @@ class DataAnalysisApp:
 
             combination_metrics = {}
             for combo_name, combo_values in combinations.items():
-                combo_data = filtered_combinations_data[
+                combo_data = filtered_combinations_data[(
                     (filtered_combinations_data['Type of TVC (F/E/M)'] == combo_values['TVC']) &
                     (filtered_combinations_data['Type of ICA (F/E/M)'] == combo_values['ICA'])
-                ]
+                )]
                 avg_spont_brand_uplift = combo_data['Spont Brand Uplift (%)'].mean()
                 record_count = combo_data.shape[0]
                 combination_metrics[combo_name] = {
