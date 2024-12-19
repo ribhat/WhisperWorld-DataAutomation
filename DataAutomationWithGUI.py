@@ -193,19 +193,27 @@ class DataAnalysisApp:
             }
 
             combination_metrics = {}
+            combination_metrics_mr = {}
             for combo_name, combo_values in combinations.items():
                 combo_data = filtered_combinations_data[(
                     (filtered_combinations_data['Type of TVC (F/E/M)'] == combo_values['TVC']) &
                     (filtered_combinations_data['Type of ICA (F/E/M)'] == combo_values['ICA'])
                 )]
                 avg_spont_brand_uplift = combo_data['Spont Brand Uplift (%)'].mean()
+                avg_mr_uplift = combo_data['MR Uplift (%)'].mean()
                 record_count = combo_data.shape[0]
                 combination_metrics[combo_name] = {
                     "Average Spont Brand Uplift (%)": avg_spont_brand_uplift,
                     "Record Count": record_count
                 }
 
+                combination_metrics_mr[combo_name] = {
+                    "Average MR Uplift (%)": avg_mr_uplift,
+                    "Record Count": record_count
+                }
+
             average_uplift_for_current_type = combination_metrics[creative_type]["Average Spont Brand Uplift (%)"]
+            average_mr_uplift_for_current_type = combination_metrics_mr[creative_type]["Average MR Uplift (%)"]
 
 
 
@@ -258,6 +266,21 @@ class DataAnalysisApp:
             result += "\nNumber of Brands by Size:\n"
             for size, count in count_mr_uplifts.items():
                 result += f"  {size}: {count}\n"
+
+            result += "\n--- Type of TVC vs Type of ICA Analysis For MR---\n"
+            for combo, metrics in combination_metrics_mr.items():
+                result += f"\nCombination: {combo}\n"
+                result += f"  Average MR Uplift (%): {metrics['Average MR Uplift (%)']:.2f}\n"
+                result += f"  Record Count: {metrics['Record Count']}\n"
+
+            result += f"\n--- Comparison for Creative Type: {creative_type} ---\n"
+            result += f"Current Ad MR Uplift: {current_mr_uplift:.2f}%\n"
+            result += f"Average Spont Brand Uplift for {creative_type}: {average_mr_uplift_for_current_type:.2f}%\n"
+
+            if current_mr_uplift > average_mr_uplift_for_current_type:
+                result += f"The current ad shows a **significant improvement** compared to the average for the same creative type.\n"
+            else:
+                result += f"The current ad does **not show a significant improvement** compared to the average for the same creative type.\n"
 
             self.output_text.delete("1.0", tk.END)
             self.output_text.insert(tk.END, result)
