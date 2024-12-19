@@ -41,26 +41,35 @@ class DataAnalysisApp:
         self.spont_brand_tvc_ica_var = tk.DoubleVar(value=80)
         tk.Entry(self.inputs_frame, textvariable=self.spont_brand_tvc_ica_var).grid(row=2, column=3)
 
-        # Fourth Row: Lower Percentile and Upper Percentile
-        tk.Label(self.inputs_frame, text="Lower Percentile:").grid(row=3, column=0, sticky="e")
+        # Fourth Row: Message Recall (MR)
+        tk.Label(self.inputs_frame, text="MR TVC:").grid(row=3, column=0, sticky="e")
+        self.mr_tvc_var = tk.DoubleVar(value=61)  # Default MR TVC value
+        tk.Entry(self.inputs_frame, textvariable=self.mr_tvc_var).grid(row=3, column=1)
+
+        tk.Label(self.inputs_frame, text="MR TVC+ICA:").grid(row=3, column=2, sticky="e")
+        self.mr_tvc_ica_var = tk.DoubleVar(value=71)  # Default MR TVC+ICA value
+        tk.Entry(self.inputs_frame, textvariable=self.mr_tvc_ica_var).grid(row=3, column=3)
+
+        # Fifth Row: Lower Percentile and Upper Percentile
+        tk.Label(self.inputs_frame, text="Lower Percentile:").grid(row=4, column=0, sticky="e")
         self.lower_percentile_var = tk.DoubleVar(value=40)
-        tk.Entry(self.inputs_frame, textvariable=self.lower_percentile_var).grid(row=3, column=1)
+        tk.Entry(self.inputs_frame, textvariable=self.lower_percentile_var).grid(row=4, column=1)
 
-        tk.Label(self.inputs_frame, text="Upper Percentile:").grid(row=3, column=2, sticky="e")
+        tk.Label(self.inputs_frame, text="Upper Percentile:").grid(row=4, column=2, sticky="e")
         self.upper_percentile_var = tk.DoubleVar(value=69)
-        tk.Entry(self.inputs_frame, textvariable=self.upper_percentile_var).grid(row=3, column=3)
+        tk.Entry(self.inputs_frame, textvariable=self.upper_percentile_var).grid(row=4, column=3)
 
-        # Fifth Row: Excel File
-        tk.Label(self.inputs_frame, text="Excel File:").grid(row=4, column=0, sticky="e")
+        # Sixth Row: Excel File
+        tk.Label(self.inputs_frame, text="Excel File:").grid(row=5, column=0, sticky="e")
         self.file_path_var = tk.StringVar()
-        tk.Entry(self.inputs_frame, textvariable=self.file_path_var, width=35).grid(row=4, column=1, padx=(0, 5))
-        tk.Button(self.inputs_frame, text="Browse", command=self.browse_file).grid(row=4, column=2)
+        tk.Entry(self.inputs_frame, textvariable=self.file_path_var, width=35).grid(row=5, column=1, padx=(0, 5))
+        tk.Button(self.inputs_frame, text="Browse", command=self.browse_file).grid(row=5, column=2)
 
         # Sixth Row: Target Audience
-        tk.Label(self.inputs_frame, text="Target Audience:").grid(row=5, column=0, sticky="e")
+        tk.Label(self.inputs_frame, text="Target Audience:").grid(row=6, column=0, sticky="e")
         self.target_audience_var = tk.StringVar(value="None")
         target_audience_options = ["None", "Male", "Female"]
-        tk.OptionMenu(self.inputs_frame, self.target_audience_var, *target_audience_options).grid(row=5, column=1, padx=(0, 5))
+        tk.OptionMenu(self.inputs_frame, self.target_audience_var, *target_audience_options).grid(row=6, column=1, padx=(0, 5))
 
         # Run Button
         tk.Button(root, text="Run Analysis", command=self.run_analysis).pack(pady=10)
@@ -89,6 +98,8 @@ class DataAnalysisApp:
             tom_tvc_ica = self.tom_tvc_ica_var.get()
             spont_brand_tvc = self.spont_brand_tvc_var.get()
             spont_brand_tvc_ica = self.spont_brand_tvc_ica_var.get()
+            mr_tvc = self.mr_tvc_var.get()  # MR TVC
+            mr_tvc_ica = self.mr_tvc_ica_var.get()  # MR TVC + ICA
             creative_type = self.creative_type_var.get()
             target_audience = self.target_audience_var.get()
             file_path = self.file_path_var.get()
@@ -107,16 +118,24 @@ class DataAnalysisApp:
                 'MARKET', 'CAMPAIGN FORMAT', 'TOM - TVC', 'TOM - TVC+ICA', 
                 'TOM Uplift (TVC vs TVC + ICA)', 'BR Unaided - TVC', 
                 'BR Unaied - TVC+ICA', 'BR Unaided Uplift (TVC vs TVC + ICA)', 
-                'Type of TVC (F/E/M)', 'Type of ICA (F/E/M)'
+                'Type of TVC (F/E/M)', 'Type of ICA (F/E/M)', 'MR - TVC', 'MR - TVC+ICA'
             ]
 
             # Filter the data to include only the specified columns
             campaign_data_india = campaign_data_india[columns_to_keep]
 
-            # Perform the analysis (simplified for GUI context)
+            # Perform the analysis
+
+            # Create a new column for % Uplift of Spont Brand
             campaign_data_india['Spont Brand Uplift (%)'] = (
                 (campaign_data_india['BR Unaied - TVC+ICA'] - campaign_data_india['BR Unaided - TVC']) /
                 campaign_data_india['BR Unaided - TVC']
+            ) * 100
+
+            # Create a new column for MR Uplift %
+            campaign_data_india['MR Uplift (%)'] = (
+                (campaign_data_india['MR - TVC+ICA'] - campaign_data_india['MR - TVC']) /
+                campaign_data_india['MR - TVC']
             ) * 100
 
             filtered_data = campaign_data_india.dropna(subset=['BR Unaided - TVC', 'BR Unaied - TVC+ICA'])
@@ -143,12 +162,21 @@ class DataAnalysisApp:
                     return 'Large'
 
             filtered_data['Brand Size'] = filtered_data['BR Unaided - TVC'].apply(categorize_brand_size)
+
+            # Average Spont Brand Uplift by Brand Size
             average_spont_brand_uplifts = filtered_data.groupby('Brand Size')['Spont Brand Uplift (%)'].mean()
             count_spont_brand_uplifts = filtered_data.groupby('Brand Size')['Spont Brand Uplift (%)'].size()
 
+            # Average MR Uplift by Brand Size
+            average_mr_uplifts = filtered_data.groupby('Brand Size')['MR Uplift (%)'].mean()
+            count_mr_uplifts = filtered_data.groupby('Brand Size')['MR Uplift (%)'].size()
+
             current_spont_brand_uplift = (spont_brand_tvc_ica - spont_brand_tvc) / spont_brand_tvc * 100
+            current_mr_uplift = (mr_tvc_ica - mr_tvc) / mr_tvc * 100
+
             current_brand_size = categorize_brand_size(spont_brand_tvc)
             average_spont_uplift_for_size = average_spont_brand_uplifts[current_brand_size]
+            average_mr_uplift_for_size = average_mr_uplifts[current_brand_size]
 
             # Type of TVC vs Type of ICA Calculations
             filtered_type_data = filtered_data.dropna(subset=['Type of TVC (F/E/M)', 'Type of ICA (F/E/M)'])
@@ -178,6 +206,8 @@ class DataAnalysisApp:
                 }
 
             average_uplift_for_current_type = combination_metrics[creative_type]["Average Spont Brand Uplift (%)"]
+
+
 
             result = f"--- Analysis Results ---\n"
             result += f"Current Brand: {brand_name}\n"
@@ -211,6 +241,23 @@ class DataAnalysisApp:
                 result += f"The current ad shows a **significant improvement** compared to the average for the same creative type.\n"
             else:
                 result += f"The current ad does **not show a significant improvement** compared to the average for the same creative type.\n"
+
+            ## Output for MR analysis
+            result += f"\nCurrent Message Recall Uplift: {current_mr_uplift:.2f}%\n"
+            result += f"Average for {current_brand_size} Brands: {average_mr_uplift_for_size:.2f}%\n"
+
+            if current_mr_uplift > average_mr_uplift_for_size:
+                result += f"The current ad shows a **significant improvement**.\n"
+            else:
+                result += f"The current ad does **not show a significant improvement**.\n"
+
+            result += "\nAverage Message Recall Uplift by Brand Size:\n"
+            for size, avg_uplift in average_mr_uplifts.items():
+                result += f"  {size}: {avg_uplift:.2f}%\n"
+
+            result += "\nNumber of Brands by Size:\n"
+            for size, count in count_mr_uplifts.items():
+                result += f"  {size}: {count}\n"
 
             self.output_text.delete("1.0", tk.END)
             self.output_text.insert(tk.END, result)
