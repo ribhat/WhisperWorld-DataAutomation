@@ -216,16 +216,16 @@ class DataAnalysisApp:
             average_mr_uplift_for_current_type = combination_metrics_mr[creative_type]["Average MR Uplift (%)"]
 
 
-
+            ### Print out Results
             result = f"--- Analysis Results ---\n"
             result += f"Current Brand: {brand_name}\n"
             result += f"Current Spont Brand Uplift: {current_spont_brand_uplift:.2f}%\n"
             result += f"Average for {current_brand_size} Brands: {average_spont_uplift_for_size:.2f}%\n"
 
             if current_spont_brand_uplift > average_spont_uplift_for_size:
-                result += f"The current ad shows a **significant improvement**.\n"
+                result += f"The Spontaneous Brand Uplift % of this brand is above par for {current_brand_size} brands\n"
             else:
-                result += f"The current ad does **not show a significant improvement**.\n"
+                result += f"The Spontaneous Brand Uplift % of this brand is below par for {current_brand_size} brands\n"
 
             result += "\nAverage Spont Brand Uplift by Brand Size:\n"
             for size, avg_uplift in average_spont_brand_uplifts.items():
@@ -239,7 +239,7 @@ class DataAnalysisApp:
             for combo, metrics in combination_metrics.items():
                 result += f"\nCombination: {combo}\n"
                 result += f"  Average Spont Brand Uplift (%): {metrics['Average Spont Brand Uplift (%)']:.2f}\n"
-                result += f"  Record Count: {metrics['Record Count']}\n"
+                result += f"  Number of Studies: {metrics['Record Count']}\n"
 
             result += f"\n--- Comparison for Creative Type: {creative_type} ---\n"
             result += f"Current Ad Spont Brand Uplift: {current_spont_brand_uplift:.2f}%\n"
@@ -271,7 +271,7 @@ class DataAnalysisApp:
             for combo, metrics in combination_metrics_mr.items():
                 result += f"\nCombination: {combo}\n"
                 result += f"  Average MR Uplift (%): {metrics['Average MR Uplift (%)']:.2f}\n"
-                result += f"  Record Count: {metrics['Record Count']}\n"
+                result += f"  Number of studies: {metrics['Record Count']}\n"
 
             result += f"\n--- Comparison for Creative Type: {creative_type} ---\n"
             result += f"Current Ad MR Uplift: {current_mr_uplift:.2f}%\n"
