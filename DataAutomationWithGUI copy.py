@@ -289,7 +289,7 @@ class DataAnalysisApp:
             else:
                 result += f"The current ad does **not show a significant improvement** compared to the average for the same creative type.\n"
 
-            print(result)
+            
             self.output_text.delete("1.0", tk.END)
             self.output_text.insert(tk.END, result)
 
