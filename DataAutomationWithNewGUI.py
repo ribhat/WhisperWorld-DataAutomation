@@ -76,13 +76,44 @@ class DataAnalysisApp:
         # Output Display
         self.output_frame = ttk.Labelframe(root, text="Analysis Results", padding=(10, 10))
         self.output_frame.pack(fill="both", expand=True, padx=20, pady=10)
+        
+        # Create the Notebook for the tabs
+        self.output_notebook = ttk.Notebook(self.output_frame, padding=(10, 10))
+        self.output_notebook.pack(fill="both", expand=True, padx=20, pady=10)
 
-        self.output_text = tk.Text(self.output_frame, wrap="word", height=15, width=80)
-        self.output_text.pack(side="left", fill="both", expand=True, padx=(0, 10))
+        # Tab 1: Analysis Type 1
+        self.tab1_frame = ttk.Frame(self.output_notebook)
+        self.output_notebook.add(self.tab1_frame, text="Analysis Type 1")
 
-        scrollbar = ttk.Scrollbar(self.output_frame, command=self.output_text.yview)
-        scrollbar.pack(side="right", fill="y")
-        self.output_text.config(yscrollcommand=scrollbar.set)
+        self.output_text1 = tk.Text(self.tab1_frame, wrap="word", height=15, width=80)
+        self.output_text1.pack(side="left", fill="both", expand=True, padx=(0, 10))
+
+        scrollbar1 = ttk.Scrollbar(self.tab1_frame, command=self.output_text1.yview)
+        scrollbar1.pack(side="right", fill="y")
+        self.output_text1.config(yscrollcommand=scrollbar1.set)
+
+        # Tab 2: Analysis Type 2
+        self.tab2_frame = ttk.Frame(self.output_notebook)
+        self.output_notebook.add(self.tab2_frame, text="Analysis Type 2")
+
+        self.output_text2 = tk.Text(self.tab2_frame, wrap="word", height=15, width=80)
+        self.output_text2.pack(side="left", fill="both", expand=True, padx=(0, 10))
+
+        scrollbar2 = ttk.Scrollbar(self.tab2_frame, command=self.output_text2.yview)
+        scrollbar2.pack(side="right", fill="y")
+        self.output_text2.config(yscrollcommand=scrollbar2.set)
+
+        # Tab 3: Analysis Type 3
+        self.tab3_frame = ttk.Frame(self.output_notebook)
+        self.output_notebook.add(self.tab3_frame, text="Analysis Type 3")
+
+        self.output_text3 = tk.Text(self.tab3_frame, wrap="word", height=15, width=80)
+        self.output_text3.pack(side="left", fill="both", expand=True, padx=(0, 10))
+
+        scrollbar3 = ttk.Scrollbar(self.tab3_frame, command=self.output_text3.yview)
+        scrollbar3.pack(side="right", fill="y")
+        self.output_text3.config(yscrollcommand=scrollbar3.set)
+
 
     def create_double_var(self, default):
         var = tk.DoubleVar(value=default)
@@ -224,74 +255,81 @@ class DataAnalysisApp:
             average_mr_uplift_for_current_type = combination_metrics_mr[creative_type]["Average MR Uplift (%)"]
 
             ### Print out Results
-            result = f"--- Analysis Results ---\n"
-            result += f"Current Brand: {brand_name}\n"
-            result += f"Current Spont Brand Uplift: {current_spont_brand_uplift:.2f}%\n"
-            result += f"Average for {current_brand_size} Brands: {average_spont_uplift_for_size:.2f}%\n"
+            result1 = f"--- Analysis Results ---\n"
+            result1 += f"Current Brand: {brand_name}\n"
+            result1 += f"Current Spont Brand Uplift: {current_spont_brand_uplift:.2f}%\n"
+            result1 += f"Average for {current_brand_size} Brands: {average_spont_uplift_for_size:.2f}%\n"
 
             if current_spont_brand_uplift > average_spont_uplift_for_size:
-                result += f"The Spontaneous Brand Uplift % of this brand is above par for {current_brand_size} brands\n"
+                result1 += f"The Spontaneous Brand Uplift % of this brand is above par for {current_brand_size} brands\n"
             else:
-                result += f"The Spontaneous Brand Uplift % of this brand is below par for {current_brand_size} brands\n"
+                result1 += f"The Spontaneous Brand Uplift % of this brand is below par for {current_brand_size} brands\n"
 
-            result += "\nAverage Spont Brand Uplift by Brand Size:\n"
+            result1 += "\nAverage Spont Brand Uplift by Brand Size:\n"
             for size, avg_uplift in average_spont_brand_uplifts.items():
-                result += f"  {size}: {avg_uplift:.2f}%\n"
+                result1 += f"  {size}: {avg_uplift:.2f}%\n"
 
-            result += "\nNumber of Brands by Size:\n"
+            result1 += "\nNumber of Brands by Size:\n"
             for size, count in count_spont_brand_uplifts.items():
-                result += f"  {size}: {count}\n"
+                result1 += f"  {size}: {count}\n"
 
-            result += "\n--- Type of TVC vs Type of ICA Analysis ---\n"
+            result1 += "\n--- Type of TVC vs Type of ICA Analysis ---\n"
             for combo, metrics in combination_metrics.items():
-                result += f"\nCombination: {combo}\n"
-                result += f"  Average Spont Brand Uplift (%): {metrics['Average Spont Brand Uplift (%)']:.2f}\n"
-                result += f"  Number of Studies: {metrics['Record Count']}\n"
+                result1 += f"\nCombination: {combo}\n"
+                result1 += f"  Average Spont Brand Uplift (%): {metrics['Average Spont Brand Uplift (%)']:.2f}\n"
+                result1 += f"  Number of Studies: {metrics['Record Count']}\n"
 
-            result += f"\n--- Comparison for Creative Type: {creative_type} ---\n"
-            result += f"Current Ad Spont Brand Uplift: {current_spont_brand_uplift:.2f}%\n"
-            result += f"Average Spont Brand Uplift for {creative_type}: {average_uplift_for_current_type:.2f}%\n"
+            result1 += f"\n--- Comparison for Creative Type: {creative_type} ---\n"
+            result1 += f"Current Ad Spont Brand Uplift: {current_spont_brand_uplift:.2f}%\n"
+            result1 += f"Average Spont Brand Uplift for {creative_type}: {average_uplift_for_current_type:.2f}%\n"
 
             if current_spont_brand_uplift > average_uplift_for_current_type:
-                result += f"The current ad shows a **significant improvement** compared to the average for the same creative type.\n"
+                result1 += f"The current ad shows a **significant improvement** compared to the average for the same creative type.\n"
             else:
-                result += f"The current ad does **not show a significant improvement** compared to the average for the same creative type.\n"
+                result1 += f"The current ad does **not show a significant improvement** compared to the average for the same creative type.\n"
 
             ## Output for MR analysis
-            result += f"\nCurrent Message Recall Uplift: {current_mr_uplift:.2f}%\n"
-            result += f"Average for {current_brand_size} Brands: {average_mr_uplift_for_size:.2f}%\n"
+            result2 = f"--- Analysis Results ---\n"
+            result2 += f"\nCurrent Message Recall Uplift: {current_mr_uplift:.2f}%\n"
+            result2 += f"Average for {current_brand_size} Brands: {average_mr_uplift_for_size:.2f}%\n"
 
             if current_mr_uplift > average_mr_uplift_for_size:
-                result += f"The current ad shows a **significant improvement**.\n"
+                result2 += f"The current ad shows a **significant improvement**.\n"
             else:
-                result += f"The current ad does **not show a significant improvement**.\n"
+                result2 += f"The current ad does **not show a significant improvement**.\n"
 
-            result += "\nAverage Message Recall Uplift by Brand Size:\n"
+            result2 += "\nAverage Message Recall Uplift by Brand Size:\n"
             for size, avg_uplift in average_mr_uplifts.items():
-                result += f"  {size}: {avg_uplift:.2f}%\n"
+                result2 += f"  {size}: {avg_uplift:.2f}%\n"
 
-            result += "\nNumber of Brands by Size:\n"
+            result2 += "\nNumber of Brands by Size:\n"
             for size, count in count_mr_uplifts.items():
-                result += f"  {size}: {count}\n"
+                result2 += f"  {size}: {count}\n"
 
-            result += "\n--- Type of TVC vs Type of ICA Analysis For MR---\n"
+            result2 += "\n--- Type of TVC vs Type of ICA Analysis For MR---\n"
             for combo, metrics in combination_metrics_mr.items():
-                result += f"\nCombination: {combo}\n"
-                result += f"  Average MR Uplift (%): {metrics['Average MR Uplift (%)']:.2f}\n"
-                result += f"  Number of studies: {metrics['Record Count']}\n"
+                result2 += f"\nCombination: {combo}\n"
+                result2 += f"  Average MR Uplift (%): {metrics['Average MR Uplift (%)']:.2f}\n"
+                result2 += f"  Number of studies: {metrics['Record Count']}\n"
 
-            result += f"\n--- Comparison for Creative Type: {creative_type} ---\n"
-            result += f"Current Ad MR Uplift: {current_mr_uplift:.2f}%\n"
-            result += f"Average Spont Brand Uplift for {creative_type}: {average_mr_uplift_for_current_type:.2f}%\n"
+            result2 += f"\n--- Comparison for Creative Type: {creative_type} ---\n"
+            result2 += f"Current Ad MR Uplift: {current_mr_uplift:.2f}%\n"
+            result2 += f"Average Spont Brand Uplift for {creative_type}: {average_mr_uplift_for_current_type:.2f}%\n"
 
             if current_mr_uplift > average_mr_uplift_for_current_type:
-                result += f"The current ad shows a **significant improvement** compared to the average for the same creative type.\n"
+                result2 += f"The current ad shows a **significant improvement** compared to the average for the same creative type.\n"
             else:
-                result += f"The current ad does **not show a significant improvement** compared to the average for the same creative type.\n"
+                result2 += f"The current ad does **not show a significant improvement** compared to the average for the same creative type.\n"
 
-            print(result)
-            self.output_text.delete("1.0", tk.END)
-            self.output_text.insert(tk.END, result)
+            
+            self.output_text1.delete("1.0", tk.END)
+            self.output_text1.insert(tk.END, result1)
+
+            self.output_text2.delete("1.0", tk.END)
+            self.output_text2.insert(tk.END, result2)
+
+            self.output_text3.delete("1.0", tk.END)
+            self.output_text3.insert(tk.END, "hello")
 
         except Exception as e:
             messagebox.showerror("Error", str(e))
