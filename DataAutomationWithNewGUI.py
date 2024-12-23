@@ -50,6 +50,9 @@ class DataAnalysisApp:
         self.pi_tvc_ica_var = self.create_double_var(84)
         self.lower_percentile_var = self.create_double_var(40)
         self.upper_percentile_var = self.create_double_var(69)
+        self.country_var = self.create_string_var("INDIA")
+        self.sector_var = self.create_string_var("")
+        self.unilever_category_var = self.create_string_var("")
 
         self.add_input_row("TOM TVC:", self.inputs_frame, 1, self.tom_tvc_var)
         self.add_input_row("TOM TVC+ICA:", self.inputs_frame, 1, self.tom_tvc_ica_var, col_offset=2)
@@ -61,6 +64,9 @@ class DataAnalysisApp:
         self.add_input_row("PI TVC+ICA:", self.inputs_frame, 4, self.pi_tvc_ica_var, col_offset=2)
         self.add_input_row("Lower Percentile:", self.inputs_frame, 5, self.lower_percentile_var)
         self.add_input_row("Upper Percentile:", self.inputs_frame, 5, self.upper_percentile_var, col_offset=2)
+        self.add_input_row("Country:", self.inputs_frame, 6, self.country_var, col_offset=4)
+        self.add_input_row("Sector:", self.inputs_frame, 7, self.sector_var, col_offset=2)
+        self.add_input_row("Unilever Category:", self.inputs_frame, 7, self.unilever_category_var, col_offset=4)
 
         # File Selection
         ttk.Label(self.inputs_frame, text="Excel File:").grid(row=6, column=0, sticky="e", padx=5, pady=5)
@@ -70,8 +76,8 @@ class DataAnalysisApp:
 
         # Target Audience Dropdown
         ttk.Label(self.inputs_frame, text="Target Audience:").grid(row=7, column=0, sticky="e", padx=5, pady=5)
-        target_audience_options = ["None", "Male", "Female"]
-        self.target_audience_var = tk.StringVar(value="None")
+        target_audience_options = ["All", "Male", "Female"]
+        self.target_audience_var = tk.StringVar(value="All")
         ttk.Combobox(self.inputs_frame, textvariable=self.target_audience_var, values=target_audience_options).grid(row=7, column=1, padx=5, pady=5)
 
         # Run Button
@@ -122,6 +128,10 @@ class DataAnalysisApp:
     def create_double_var(self, default):
         var = tk.DoubleVar(value=default)
         return var
+    
+    def create_string_var(self, default):
+        var = tk.StringVar(value=default)  # Use StringVar instead of DoubleVar
+        return var
 
     def add_input_row(self, label, frame, row, variable, col_offset=0):
         ttk.Label(frame, text=label).grid(row=row, column=0 + col_offset, sticky="e", padx=5, pady=5)
@@ -147,21 +157,25 @@ class DataAnalysisApp:
             creative_type = self.creative_type_var.get()
             target_audience = self.target_audience_var.get()
             file_path = self.file_path_var.get()
+            country = self.country_var.get()
+            sector = self.sector_var.get()
+            unilever_category = self.unilever_category_var.get()
             lower_percentile = self.lower_percentile_var.get()
             upper_percentile = self.upper_percentile_var.get()
+
 
             if not file_path:
                 raise ValueError("Please select a valid Excel file.")
 
             # Load the dataset
-            campaign_data_india = pd.read_excel(file_path, sheet_name='INDIA', engine='openpyxl')
+            campaign_data_india = pd.read_excel(file_path, sheet_name= country, engine='openpyxl')
 
             # List of columns to keep; Remove unused columns for manageability
             columns_to_keep = [
-                'Year', 'SECTOR', 'CATEGORY', 'ADVERTISER', 'BRAND', 'TARGET AUDIENCE',
+                'Year', 'SECTOR', 'UNILEVER CATEGORY', 'CATEGORY', 'ADVERTISER', 'BRAND', 'TARGET AUDIENCE',
                 'MARKET', 'CAMPAIGN FORMAT', 'TOM - TVC', 'TOM - TVC+ICA', 
                 'TOM Uplift (TVC vs TVC + ICA)', 'BR Unaided - TVC', 
-                'BR Unaied - TVC+ICA', 'BR Unaided Uplift (TVC vs TVC + ICA)', 
+                'BR Unaided - TVC+ICA', 'BR Unaided Uplift (TVC vs TVC + ICA)', 
                 'Type of TVC (F/E/M)', 'Type of ICA (F/E/M)', 'MR - TVC', 'MR - TVC+ICA',
                 'PI - TVC', 'PI - TVC+ICA'
             ]
@@ -173,7 +187,7 @@ class DataAnalysisApp:
 
             # Create a new column for % Uplift of Spont Brand
             campaign_data_india['Spont Brand Uplift (%)'] = (
-                (campaign_data_india['BR Unaied - TVC+ICA'] - campaign_data_india['BR Unaided - TVC']) /
+                (campaign_data_india['BR Unaided - TVC+ICA'] - campaign_data_india['BR Unaided - TVC']) /
                 campaign_data_india['BR Unaided - TVC']
             ) * 100
 
@@ -189,7 +203,7 @@ class DataAnalysisApp:
                 campaign_data_india['PI - TVC']
             ) * 100
 
-            filtered_data = campaign_data_india.dropna(subset=['BR Unaided - TVC', 'BR Unaied - TVC+ICA'])
+            filtered_data = campaign_data_india.dropna(subset=['BR Unaided - TVC', 'BR Unaided - TVC+ICA'])
 
             # Exclude low outliers
             filtered_data = filtered_data[filtered_data['BR Unaided - TVC'] > 25]
@@ -201,6 +215,14 @@ class DataAnalysisApp:
                 filtered_data = filtered_data[filtered_data['TARGET AUDIENCE'].str[0] == 'F']
             elif target_audience == "Male":
                 filtered_data = filtered_data[filtered_data['TARGET AUDIENCE'].str[0] == 'M']
+
+            # Filter for records with specified sector if applicable
+            if sector:
+                filtered_data = filtered_data[filtered_data['SECTOR'] == sector]
+
+            # Filter for records with specified Unilever Category if applicable
+            if unilever_category:
+                filtered_data = filtered_data[filtered_data['UNILEVER CATEGORY'] == unilever_category]
 
 
             br_unaided_percentiles = filtered_data['BR Unaided - TVC'].quantile([lower_percentile / 100, upper_percentile / 100])
