@@ -46,6 +46,8 @@ class DataAnalysisApp:
         self.spont_brand_tvc_ica_var = self.create_double_var(80)
         self.mr_tvc_var = self.create_double_var(61)
         self.mr_tvc_ica_var = self.create_double_var(71)
+        self.pi_tvc_var = self.create_double_var(80)
+        self.pi_tvc_ica_var = self.create_double_var(84)
         self.lower_percentile_var = self.create_double_var(40)
         self.upper_percentile_var = self.create_double_var(69)
 
@@ -55,20 +57,22 @@ class DataAnalysisApp:
         self.add_input_row("Spont Brand TVC+ICA:", self.inputs_frame, 2, self.spont_brand_tvc_ica_var, col_offset=2)
         self.add_input_row("MR TVC:", self.inputs_frame, 3, self.mr_tvc_var)
         self.add_input_row("MR TVC+ICA:", self.inputs_frame, 3, self.mr_tvc_ica_var, col_offset=2)
-        self.add_input_row("Lower Percentile:", self.inputs_frame, 4, self.lower_percentile_var)
-        self.add_input_row("Upper Percentile:", self.inputs_frame, 4, self.upper_percentile_var, col_offset=2)
+        self.add_input_row("PI TVC:", self.inputs_frame, 4, self.pi_tvc_var)
+        self.add_input_row("PI TVC+ICA:", self.inputs_frame, 4, self.pi_tvc_ica_var, col_offset=2)
+        self.add_input_row("Lower Percentile:", self.inputs_frame, 5, self.lower_percentile_var)
+        self.add_input_row("Upper Percentile:", self.inputs_frame, 5, self.upper_percentile_var, col_offset=2)
 
         # File Selection
-        ttk.Label(self.inputs_frame, text="Excel File:").grid(row=5, column=0, sticky="e", padx=5, pady=5)
+        ttk.Label(self.inputs_frame, text="Excel File:").grid(row=6, column=0, sticky="e", padx=5, pady=5)
         self.file_path_var = tk.StringVar()
-        ttk.Entry(self.inputs_frame, textvariable=self.file_path_var, width=35).grid(row=5, column=1, columnspan=2, padx=5, pady=5)
-        ttk.Button(self.inputs_frame, text="Browse", command=self.browse_file).grid(row=5, column=3, padx=5, pady=5)
+        ttk.Entry(self.inputs_frame, textvariable=self.file_path_var, width=35).grid(row=6, column=1, columnspan=2, padx=5, pady=5)
+        ttk.Button(self.inputs_frame, text="Browse", command=self.browse_file).grid(row=6, column=3, padx=5, pady=5)
 
         # Target Audience Dropdown
-        ttk.Label(self.inputs_frame, text="Target Audience:").grid(row=6, column=0, sticky="e", padx=5, pady=5)
+        ttk.Label(self.inputs_frame, text="Target Audience:").grid(row=7, column=0, sticky="e", padx=5, pady=5)
         target_audience_options = ["None", "Male", "Female"]
         self.target_audience_var = tk.StringVar(value="None")
-        ttk.Combobox(self.inputs_frame, textvariable=self.target_audience_var, values=target_audience_options).grid(row=6, column=1, padx=5, pady=5)
+        ttk.Combobox(self.inputs_frame, textvariable=self.target_audience_var, values=target_audience_options).grid(row=7, column=1, padx=5, pady=5)
 
         # Run Button
         ttk.Button(root, text="Run Analysis", command=self.run_analysis).pack(pady=10)
@@ -83,7 +87,7 @@ class DataAnalysisApp:
 
         # Tab 1: Analysis Type 1
         self.tab1_frame = ttk.Frame(self.output_notebook)
-        self.output_notebook.add(self.tab1_frame, text="Analysis Type 1")
+        self.output_notebook.add(self.tab1_frame, text="Spont Brand")
 
         self.output_text1 = tk.Text(self.tab1_frame, wrap="word", height=15, width=80)
         self.output_text1.pack(side="left", fill="both", expand=True, padx=(0, 10))
@@ -94,7 +98,7 @@ class DataAnalysisApp:
 
         # Tab 2: Analysis Type 2
         self.tab2_frame = ttk.Frame(self.output_notebook)
-        self.output_notebook.add(self.tab2_frame, text="Analysis Type 2")
+        self.output_notebook.add(self.tab2_frame, text="Message Recall")
 
         self.output_text2 = tk.Text(self.tab2_frame, wrap="word", height=15, width=80)
         self.output_text2.pack(side="left", fill="both", expand=True, padx=(0, 10))
@@ -105,7 +109,7 @@ class DataAnalysisApp:
 
         # Tab 3: Analysis Type 3
         self.tab3_frame = ttk.Frame(self.output_notebook)
-        self.output_notebook.add(self.tab3_frame, text="Analysis Type 3")
+        self.output_notebook.add(self.tab3_frame, text="Purchase Intent")
 
         self.output_text3 = tk.Text(self.tab3_frame, wrap="word", height=15, width=80)
         self.output_text3.pack(side="left", fill="both", expand=True, padx=(0, 10))
@@ -138,6 +142,8 @@ class DataAnalysisApp:
             spont_brand_tvc_ica = self.spont_brand_tvc_ica_var.get()
             mr_tvc = self.mr_tvc_var.get()  # MR TVC
             mr_tvc_ica = self.mr_tvc_ica_var.get()  # MR TVC + ICA
+            pi_tvc = self.pi_tvc_var.get()  # PI TVC
+            pi_tvc_ica = self.pi_tvc_ica_var.get()  # PI TVC + ICA
             creative_type = self.creative_type_var.get()
             target_audience = self.target_audience_var.get()
             file_path = self.file_path_var.get()
@@ -156,7 +162,8 @@ class DataAnalysisApp:
                 'MARKET', 'CAMPAIGN FORMAT', 'TOM - TVC', 'TOM - TVC+ICA', 
                 'TOM Uplift (TVC vs TVC + ICA)', 'BR Unaided - TVC', 
                 'BR Unaied - TVC+ICA', 'BR Unaided Uplift (TVC vs TVC + ICA)', 
-                'Type of TVC (F/E/M)', 'Type of ICA (F/E/M)', 'MR - TVC', 'MR - TVC+ICA'
+                'Type of TVC (F/E/M)', 'Type of ICA (F/E/M)', 'MR - TVC', 'MR - TVC+ICA',
+                'PI - TVC', 'PI - TVC+ICA'
             ]
 
             # Filter the data to include only the specified columns
@@ -174,6 +181,12 @@ class DataAnalysisApp:
             campaign_data_india['MR Uplift (%)'] = (
                 (campaign_data_india['MR - TVC+ICA'] - campaign_data_india['MR - TVC']) /
                 campaign_data_india['MR - TVC']
+            ) * 100
+
+            # Create a new column for PI Uplift %
+            campaign_data_india['PI Uplift (%)'] = (
+                (campaign_data_india['PI - TVC+ICA'] - campaign_data_india['PI - TVC']) /
+                campaign_data_india['PI - TVC']
             ) * 100
 
             filtered_data = campaign_data_india.dropna(subset=['BR Unaided - TVC', 'BR Unaied - TVC+ICA'])
@@ -210,12 +223,19 @@ class DataAnalysisApp:
             average_mr_uplifts = filtered_data.groupby('Brand Size')['MR Uplift (%)'].mean()
             count_mr_uplifts = filtered_data.groupby('Brand Size')['MR Uplift (%)'].size()
 
+            # Average PI Uplift by Brand Size
+            average_pi_uplifts = filtered_data.groupby('Brand Size')['PI Uplift (%)'].mean()
+            count_pi_uplifts = filtered_data.groupby('Brand Size')['PI Uplift (%)'].size()
+
             current_spont_brand_uplift = (spont_brand_tvc_ica - spont_brand_tvc) / spont_brand_tvc * 100
             current_mr_uplift = (mr_tvc_ica - mr_tvc) / mr_tvc * 100
+            current_pi_uplift = (pi_tvc_ica - pi_tvc) / pi_tvc * 100
 
             current_brand_size = categorize_brand_size(spont_brand_tvc)
+
             average_spont_uplift_for_size = average_spont_brand_uplifts[current_brand_size]
             average_mr_uplift_for_size = average_mr_uplifts[current_brand_size]
+            average_pi_uplift_for_size = average_pi_uplifts[current_brand_size]
 
             # Type of TVC vs Type of ICA Calculations
             filtered_type_data = filtered_data.dropna(subset=['Type of TVC (F/E/M)', 'Type of ICA (F/E/M)'])
@@ -233,6 +253,7 @@ class DataAnalysisApp:
 
             combination_metrics = {}
             combination_metrics_mr = {}
+            combination_metrics_pi = {}
             for combo_name, combo_values in combinations.items():
                 combo_data = filtered_combinations_data[(
                     (filtered_combinations_data['Type of TVC (F/E/M)'] == combo_values['TVC']) &
@@ -240,6 +261,8 @@ class DataAnalysisApp:
                 )]
                 avg_spont_brand_uplift = combo_data['Spont Brand Uplift (%)'].mean()
                 avg_mr_uplift = combo_data['MR Uplift (%)'].mean()
+                avg_pi_uplift = combo_data['PI Uplift (%)'].mean()
+
                 record_count = combo_data.shape[0]
                 combination_metrics[combo_name] = {
                     "Average Spont Brand Uplift (%)": avg_spont_brand_uplift,
@@ -251,8 +274,14 @@ class DataAnalysisApp:
                     "Record Count": record_count
                 }
 
+                combination_metrics_pi[combo_name] = {
+                    "Average PI Uplift (%)": avg_pi_uplift,
+                    "Record Count": record_count
+                }
+
             average_uplift_for_current_type = combination_metrics[creative_type]["Average Spont Brand Uplift (%)"]
             average_mr_uplift_for_current_type = combination_metrics_mr[creative_type]["Average MR Uplift (%)"]
+            average_pi_uplift_for_current_type = combination_metrics_pi[creative_type]["Average PI Uplift (%)"]
 
             ### Print out Results
             result1 = f"--- Analysis Results ---\n"
@@ -314,12 +343,46 @@ class DataAnalysisApp:
 
             result2 += f"\n--- Comparison for Creative Type: {creative_type} ---\n"
             result2 += f"Current Ad MR Uplift: {current_mr_uplift:.2f}%\n"
-            result2 += f"Average Spont Brand Uplift for {creative_type}: {average_mr_uplift_for_current_type:.2f}%\n"
+            result2 += f"Average Message Recall Uplift for {creative_type}: {average_mr_uplift_for_current_type:.2f}%\n"
 
             if current_mr_uplift > average_mr_uplift_for_current_type:
                 result2 += f"The current ad shows a **significant improvement** compared to the average for the same creative type.\n"
             else:
                 result2 += f"The current ad does **not show a significant improvement** compared to the average for the same creative type.\n"
+
+            
+            ## Output for PI Analysis
+            result3 = f"--- Analysis Results ---\n"
+            result3 += f"\nCurrent Purchase Intent Uplift: {current_pi_uplift:.2f}%\n"
+            result3 += f"Average for {current_brand_size} Brands: {average_pi_uplift_for_size:.2f}%\n"
+
+            if current_pi_uplift > average_pi_uplift_for_size:
+                result3 += f"The current ad shows a **significant improvement**.\n"
+            else:
+                result3 += f"The current ad does **not show a significant improvement**.\n"
+
+            result3 += "\nAverage Purchase Intent Uplift by Brand Size:\n"
+            for size, avg_uplift in average_pi_uplifts.items():
+                result3 += f"  {size}: {avg_uplift:.2f}%\n"
+
+            result3 += "\nNumber of Brands by Size:\n"
+            for size, count in count_pi_uplifts.items():
+                result3 += f"  {size}: {count}\n"
+
+            result3 += "\n--- Type of TVC vs Type of ICA Analysis For PI---\n"
+            for combo, metrics in combination_metrics_pi.items():
+                result3 += f"\nCombination: {combo}\n"
+                result3 += f"  Average PI Uplift (%): {metrics['Average PI Uplift (%)']:.2f}\n"
+                result3 += f"  Number of studies: {metrics['Record Count']}\n"
+
+            result3 += f"\n--- Comparison for Creative Type: {creative_type} ---\n"
+            result3 += f"Current Ad PI Uplift: {current_pi_uplift:.2f}%\n"
+            result3 += f"Average Purchase Intent Uplift for {creative_type}: {average_pi_uplift_for_current_type:.2f}%\n"
+
+            if current_pi_uplift > average_pi_uplift_for_current_type:
+                result3 += f"The current ad shows a **significant improvement** compared to the average for the same creative type.\n"
+            else:
+                result3 += f"The current ad does **not show a significant improvement** compared to the average for the same creative type.\n"
 
             
             self.output_text1.delete("1.0", tk.END)
@@ -329,7 +392,7 @@ class DataAnalysisApp:
             self.output_text2.insert(tk.END, result2)
 
             self.output_text3.delete("1.0", tk.END)
-            self.output_text3.insert(tk.END, "hello")
+            self.output_text3.insert(tk.END, result3)
 
         except Exception as e:
             messagebox.showerror("Error", str(e))
