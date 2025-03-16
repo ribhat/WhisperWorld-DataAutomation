@@ -170,8 +170,14 @@ class DataAnalysisApp:
             if not file_path:
                 raise ValueError("Please select a valid Excel file.")
 
-            # Load the dataset
-            campaign_data_india = pd.read_excel(file_path, sheet_name= country, engine='openpyxl')
+            # Split the country input into a list of sheet names
+            sheet_names = [name.strip() for name in country.split(",")]
+
+            # Load and combine the datasets from multiple sheets
+            campaign_data = pd.DataFrame()
+            for sheet in sheet_names:
+                sheet_data = pd.read_excel(file_path, sheet_name=sheet, engine='openpyxl')
+                campaign_data = pd.concat([campaign_data, sheet_data], ignore_index=True)
 
             # List of columns to keep; Remove unused columns for manageability
             columns_to_keep = [
@@ -184,29 +190,29 @@ class DataAnalysisApp:
             ]
 
             # Filter the data to include only the specified columns
-            campaign_data_india = campaign_data_india[columns_to_keep]
+            campaign_data = campaign_data[columns_to_keep]
 
             # Perform the analysis
 
             # Create a new column for % Uplift of Spont Brand
-            campaign_data_india['Spont Brand Uplift (%)'] = (
-                (campaign_data_india['BR Unaided - TVC+ICA'] - campaign_data_india['BR Unaided - TVC']) /
-                campaign_data_india['BR Unaided - TVC']
+            campaign_data['Spont Brand Uplift (%)'] = (
+                (campaign_data['BR Unaided - TVC+ICA'] - campaign_data['BR Unaided - TVC']) /
+                campaign_data['BR Unaided - TVC']
             ) * 100
 
             # Create a new column for MR Uplift %
-            campaign_data_india['MR Uplift (%)'] = (
-                (campaign_data_india['MR - TVC+ICA'] - campaign_data_india['MR - TVC']) /
-                campaign_data_india['MR - TVC']
+            campaign_data['MR Uplift (%)'] = (
+                (campaign_data['MR - TVC+ICA'] - campaign_data['MR - TVC']) /
+                campaign_data['MR - TVC']
             ) * 100
 
             # Create a new column for PI Uplift %
-            campaign_data_india['PI Uplift (%)'] = (
-                (campaign_data_india['PI - TVC+ICA'] - campaign_data_india['PI - TVC']) /
-                campaign_data_india['PI - TVC']
+            campaign_data['PI Uplift (%)'] = (
+                (campaign_data['PI - TVC+ICA'] - campaign_data['PI - TVC']) /
+                campaign_data['PI - TVC']
             ) * 100
 
-            filtered_data = campaign_data_india.dropna(subset=['BR Unaided - TVC', 'BR Unaided - TVC+ICA'])
+            filtered_data = campaign_data.dropna(subset=['BR Unaided - TVC', 'BR Unaided - TVC+ICA'])
 
             # Exclude low outliers
             filtered_data = filtered_data[filtered_data['BR Unaided - TVC'] > excluded_values]
