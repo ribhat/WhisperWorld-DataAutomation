@@ -50,6 +50,7 @@ class DataAnalysisApp:
         self.pi_tvc_ica_var = self.create_double_var(84)
         self.lower_percentile_var = self.create_double_var(40)
         self.upper_percentile_var = self.create_double_var(69)
+        self.excluded_values_var = self.create_double_var(25)
         self.country_var = self.create_string_var("INDIA")
         self.sector_var = self.create_string_var("")
         self.unilever_category_var = self.create_string_var("")
@@ -64,6 +65,7 @@ class DataAnalysisApp:
         self.add_input_row("PI TVC+ICA:", self.inputs_frame, 4, self.pi_tvc_ica_var, col_offset=2)
         self.add_input_row("Lower Percentile:", self.inputs_frame, 5, self.lower_percentile_var)
         self.add_input_row("Upper Percentile:", self.inputs_frame, 5, self.upper_percentile_var, col_offset=2)
+        self.add_input_row("Exclude records with TVC under:", self.inputs_frame, 5, self.excluded_values_var, col_offset=4)
         self.add_input_row("Country:", self.inputs_frame, 6, self.country_var, col_offset=4)
         self.add_input_row("Sector:", self.inputs_frame, 7, self.sector_var, col_offset=2)
         self.add_input_row("Unilever Category:", self.inputs_frame, 7, self.unilever_category_var, col_offset=4)
@@ -162,6 +164,7 @@ class DataAnalysisApp:
             unilever_category = self.unilever_category_var.get()
             lower_percentile = self.lower_percentile_var.get()
             upper_percentile = self.upper_percentile_var.get()
+            excluded_values = self.excluded_values_var.get()
 
 
             if not file_path:
@@ -206,7 +209,7 @@ class DataAnalysisApp:
             filtered_data = campaign_data_india.dropna(subset=['BR Unaided - TVC', 'BR Unaided - TVC+ICA'])
 
             # Exclude low outliers
-            filtered_data = filtered_data[filtered_data['BR Unaided - TVC'] > 25]
+            filtered_data = filtered_data[filtered_data['BR Unaided - TVC'] > excluded_values]
 
             # Filter for records where the target audience is female/male
             filtered_data['TARGET AUDIENCE'] = filtered_data['TARGET AUDIENCE'].astype(str)
